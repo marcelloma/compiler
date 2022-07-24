@@ -24,12 +24,23 @@ compiler_env *build_compiler_env() {
   // I don't see a builtin way to do this, but found this online:
   // https://stackoverflow.com/questions/46583467/gccjit-get-the-size-of-a-type
   // Alternatively I suppose we could run sizeof for every type we intend to use and just have it precalculated.
+  add_printf_function(env);
   add_malloc_function(env);
   add_free_function(env);
   add_mpd_new_function(env);
   add_mpd_set_string_function(env);
+  add_get_mpd_ctx_function(env);
+  add_dec_minus(env);
+  add_dec_from_str(env);
 
   return env;
+}
+
+void add_printf_function(compiler_env *env) {
+  // int printf(const char *__restrict__, ...)
+  gcc_jit_param *format_param = gcc_jit_context_new_param(env->ctx, NULL, env->string_type, "__restrict__");
+  env->printf = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->int_type, "printf", 1,
+                                             &format_param, 1);
 }
 
 void add_malloc_function(compiler_env *env) {
@@ -61,6 +72,31 @@ void add_mpd_set_string_function(compiler_env *env) {
   gcc_jit_param *params[3] = {result_param, s_param, ctx_param};
   env->mpd_set_string = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_type,
                                                      "mpd_set_string", 3, params, 0);
+}
+
+void add_get_mpd_ctx_function(compiler_env *env) {
+  // mpd_context_t *get_mpd_ctx(runtime_env *env)
+  gcc_jit_param *env_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "env");
+  env->get_mpd_ctx = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_ptr_type,
+                                                  "get_mpd_ctx", 1, &env_param, 0);
+}
+
+void add_dec_from_str(compiler_env *env) {
+  // mpd_t *dec_from_str(const char *str, runtime_env *env);
+  gcc_jit_param *str_param = gcc_jit_context_new_param(env->ctx, NULL, env->string_type, "str");
+  gcc_jit_param *env_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "env");
+  gcc_jit_param *params[2] = {str_param, env_param};
+  env->dec_from_str = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_ptr_type,
+                                                   "dec_from_str", 2, params, 0);
+}
+
+void add_dec_minus(compiler_env *env) {
+  // mpd_t *dec_minus(mpd_t *dec, runtime_env *env);
+  gcc_jit_param *dec_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "dec");
+  gcc_jit_param *ctx_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "ctx");
+  gcc_jit_param *params[2] = {dec_param, ctx_param};
+  env->dec_minus = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_ptr_type,
+                                                "dec_minus", 2, params, 0);
 }
 
 void release_compiler_env(compiler_env *env) {

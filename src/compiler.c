@@ -1,10 +1,14 @@
 #include "../src/compiler.h"
 
 gcc_jit_rvalue *comp_un_op_ast(const char *token, json_object *ast, compiler_env *c_env) {
-  gcc_jit_rvalue *rvalue = comp_ast(ast, c_env);
-
   if (strcmp(token, "-") == 0) {
-    return gcc_jit_context_new_unary_op(c_env->ctx, NULL, GCC_JIT_UNARY_OP_MINUS, c_env->double_type, rvalue);
+    gcc_jit_rvalue *dec = comp_ast(ast, c_env);
+    gcc_jit_rvalue *args[2] = {dec, gcc_jit_param_as_rvalue(c_env->r_env)};
+    return gcc_jit_context_new_call(c_env->ctx, NULL, c_env->dec_minus, 2, args);
+  } else if (strcmp(token, "number") == 0) {
+    gcc_jit_rvalue *dec_str = gcc_jit_context_new_string_literal(c_env->ctx, json_object_get_string(ast));
+    gcc_jit_rvalue *args[2] = {dec_str, gcc_jit_param_as_rvalue(c_env->r_env)};
+    return gcc_jit_context_new_call(c_env->ctx, NULL, c_env->dec_from_str, 2, args);
   } else {
     fprintf(stderr, "unsupported unary operator %s\n", token);
     exit(1);
@@ -64,7 +68,7 @@ gcc_jit_rvalue *comp_ast(json_object *ast, compiler_env *c_env) {
       }
     }
     default: {
-      fprintf(stderr, "error: unexpected json_obj_type\n");
+      fprintf(stderr, "error: unexpected json_obj_type %u\n", json_obj_type);
       exit(1);
     }
   }
@@ -83,12 +87,17 @@ void comp_calculated_field(json_object *j_calculated_field, compiler_env *c_env)
   asprintf(tmp_name, "calculated_field_%d", id);
   const char *name = tmp_name[0];
 
-  gcc_jit_function *func =
-      gcc_jit_context_new_function(c_env->ctx, NULL, GCC_JIT_FUNCTION_EXPORTED, c_env->double_type, name, 0, NULL, 0);
+  c_env->r_env = gcc_jit_context_new_param(c_env->ctx, NULL, c_env->void_ptr_type, "r_env");
+  c_env->func = gcc_jit_context_new_function(c_env->ctx, NULL, GCC_JIT_FUNCTION_EXPORTED, c_env->void_ptr_type, name, 1,
+                                             &c_env->r_env, 0);
 
-  gcc_jit_block *block = gcc_jit_function_new_block(func, NULL);
+  c_env->block = gcc_jit_function_new_block(c_env->func, NULL);
 
-  gcc_jit_block_end_with_return(block, NULL, comp_ast(j_ast, c_env));
+  gcc_jit_rvalue *r_env_rvalue = gcc_jit_param_as_rvalue(c_env->r_env);
+
+  c_env->mpd_ctx = gcc_jit_context_new_call(c_env->ctx, NULL, c_env->get_mpd_ctx, 1, &r_env_rvalue);
+
+  gcc_jit_block_end_with_return(c_env->block, NULL, comp_ast(j_ast, c_env));
 }
 
 void comp_calculated_fields(json_object *j_structure, compiler_env *c_env) {

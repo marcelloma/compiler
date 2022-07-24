@@ -23,7 +23,8 @@
     "algorithm": "c",
     "compiler.h": "c",
     "structure.h": "c",
-    "typeinfo": "c"
+    "typeinfo": "c",
+    "complex": "c"
   },
   "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }
