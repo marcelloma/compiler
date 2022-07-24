@@ -83,12 +83,26 @@ void comp_calculated_field(json_object *j_calculated_field, compiler_env *c_env)
   asprintf(tmp_name, "calculated_field_%d", id);
   const char *name = tmp_name[0];
 
-  gcc_jit_function *func =
-      gcc_jit_context_new_function(c_env->ctx, NULL, GCC_JIT_FUNCTION_EXPORTED, c_env->double_type, name, 0, NULL, 0);
+  gcc_jit_param *mpd_ctx_param = gcc_jit_context_new_param(c_env->ctx, NULL, c_env->void_ptr_type, "mpd_ctx");
+
+  gcc_jit_function *func = gcc_jit_context_new_function(c_env->ctx, NULL, GCC_JIT_FUNCTION_EXPORTED,
+                                                        c_env->void_ptr_type, name, 1, &mpd_ctx_param, 0);
 
   gcc_jit_block *block = gcc_jit_function_new_block(func, NULL);
 
-  gcc_jit_block_end_with_return(block, NULL, comp_ast(j_ast, c_env));
+  gcc_jit_rvalue *mpd_ctx = gcc_jit_param_as_rvalue(mpd_ctx_param);
+
+  gcc_jit_lvalue *decimal_lvalue = gcc_jit_function_new_local(func, NULL, c_env->void_ptr_type, "decimal");
+  gcc_jit_rvalue *decimal_rvalue = gcc_jit_lvalue_as_rvalue(decimal_lvalue);
+
+  gcc_jit_block_add_assignment(block, NULL, decimal_lvalue,
+                               gcc_jit_context_new_call(c_env->ctx, NULL, c_env->mpd_new, 1, &mpd_ctx));
+
+  gcc_jit_rvalue *str = gcc_jit_context_new_string_literal(c_env->ctx, "1");
+  gcc_jit_rvalue *args[3] = {decimal_rvalue, str, mpd_ctx};
+  gcc_jit_context_new_call(c_env->ctx, NULL, c_env->mpd_set_string, 3, args);
+
+  gcc_jit_block_end_with_return(block, NULL, decimal_rvalue);
 }
 
 void comp_calculated_fields(json_object *j_structure, compiler_env *c_env) {
