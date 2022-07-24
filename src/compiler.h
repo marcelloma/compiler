@@ -14,5 +14,4 @@
 gcc_jit_rvalue *comp_un_op_ast(const char *token, json_object *ast, compiler_env *c_env);
 gcc_jit_rvalue *comp_bin_op_ast(const char *token, json_object *lhs_ast, json_object *rhs_ast, compiler_env *c_env);
 gcc_jit_rvalue *comp_ast(json_object *ast, compiler_env *c_env);
-
 void comp_calculated_fields(json_object *structure, compiler_env *c_env);

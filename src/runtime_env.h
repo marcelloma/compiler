@@ -8,5 +8,4 @@ typedef struct {
 } runtime_env;
 
 runtime_env *build_runtime_env();
-
 void release_runtime_env(runtime_env *env);

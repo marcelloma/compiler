@@ -5,6 +5,8 @@ compiler_env *build_compiler_env() {
   if (env == NULL) exit(1);
 
   env->ctx = gcc_jit_context_acquire();
+  env->void_ptr_type = gcc_jit_context_get_type(env->ctx, GCC_JIT_TYPE_VOID_PTR);
+  env->size_t_type = gcc_jit_context_get_type(env->ctx, GCC_JIT_TYPE_SIZE_T);
   env->bool_type = gcc_jit_context_get_type(env->ctx, GCC_JIT_TYPE_BOOL);
   env->int_type = gcc_jit_context_get_type(env->ctx, GCC_JIT_TYPE_INT);
   env->double_type = gcc_jit_context_get_type(env->ctx, GCC_JIT_TYPE_DOUBLE);
@@ -17,7 +19,24 @@ compiler_env *build_compiler_env() {
   env->money_type = gcc_jit_struct_as_type(money);
   env->money_ptr_type = gcc_jit_type_get_pointer(env->money_type);
 
+  // In order to use malloc/free we need to figure out how to get sizeof a type.
+  // I don't see a builtin way to do this, but found this online:
+  // https://stackoverflow.com/questions/46583467/gccjit-get-the-size-of-a-type
+  // Alternatively I suppose we could run sizeof for every type we intend to use and just have it precalculated.
+  add_malloc_function(env);
+  add_free_function(env);
+
   return env;
+}
+
+void add_malloc_function(compiler_env *env) {
+  gcc_jit_param *size_param = gcc_jit_context_new_param(env->ctx, NULL, env->size_t_type, "size");
+  env->malloc = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_ptr_type, "malloc", 1, &size_param, 0);
+}
+
+void add_free_function(compiler_env *env) {
+  gcc_jit_param *ptr_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "ptr");
+  env->free = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_ptr_type, "free", 1, &ptr_param, 0);
 }
 
 void release_compiler_env(compiler_env *env) {
