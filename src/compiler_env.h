@@ -10,6 +10,7 @@ typedef struct {
   gcc_jit_type *bool_type;
   gcc_jit_type *int_type;
   gcc_jit_type *double_type;
+  gcc_jit_type *double_type_ptr;
   gcc_jit_type *string_type;
   gcc_jit_type *money_type;
   gcc_jit_type *money_ptr_type;

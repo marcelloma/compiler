@@ -11,6 +11,7 @@ compiler_env *build_compiler_env() {
   env->bool_type = gcc_jit_context_get_type(env->ctx, GCC_JIT_TYPE_BOOL);
   env->int_type = gcc_jit_context_get_type(env->ctx, GCC_JIT_TYPE_INT);
   env->double_type = gcc_jit_context_get_type(env->ctx, GCC_JIT_TYPE_DOUBLE);
+  env->double_type_ptr = gcc_jit_type_get_pointer(env->double_type);
   env->string_type = gcc_jit_context_get_type(env->ctx, GCC_JIT_TYPE_CONST_CHAR_PTR);
 
   env->money_amount_field = gcc_jit_context_new_field(env->ctx, NULL, env->double_type, "amount");

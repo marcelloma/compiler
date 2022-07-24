@@ -84,11 +84,20 @@ void comp_calculated_field(json_object *j_calculated_field, compiler_env *c_env)
   const char *name = tmp_name[0];
 
   gcc_jit_function *func =
-      gcc_jit_context_new_function(c_env->ctx, NULL, GCC_JIT_FUNCTION_EXPORTED, c_env->double_type, name, 0, NULL, 0);
+      gcc_jit_context_new_function(c_env->ctx, NULL, GCC_JIT_FUNCTION_EXPORTED, c_env->void_ptr_type, name, 0, NULL, 0);
 
   gcc_jit_block *block = gcc_jit_function_new_block(func, NULL);
 
-  gcc_jit_block_end_with_return(block, NULL, comp_ast(j_ast, c_env));
+  gcc_jit_lvalue *lvalue = gcc_jit_function_new_local(func, NULL, c_env->double_type_ptr, "dbl_ptr");
+  gcc_jit_rvalue *eight = gcc_jit_context_new_rvalue_from_int(c_env->ctx, c_env->size_t_type, 8);
+  gcc_jit_rvalue *fourtwenty = gcc_jit_context_new_rvalue_from_int(c_env->ctx, c_env->double_type, 420);
+
+  gcc_jit_block_add_assignment(block, NULL, lvalue, gcc_jit_context_new_cast(c_env->ctx, NULL, gcc_jit_context_new_call(c_env->ctx, NULL, c_env->malloc, 1, &eight), c_env->double_type_ptr));
+
+  gcc_jit_lvalue *lvalue_deref = gcc_jit_rvalue_dereference(gcc_jit_lvalue_as_rvalue(lvalue), NULL);
+  gcc_jit_block_add_assignment(block, NULL, lvalue_deref, fourtwenty);
+  
+  gcc_jit_block_end_with_return(block, NULL, gcc_jit_lvalue_as_rvalue(lvalue));
 }
 
 void comp_calculated_fields(json_object *j_structure, compiler_env *c_env) {
