@@ -1,7 +1,6 @@
 #include "../src/structure.h"
 
-json_object *read_structure_json()
-{
+json_object *read_structure_json() {
   FILE *file = fopen(STRUCTURE_FILE, "r");
 
   fseek(file, 0, SEEK_END);

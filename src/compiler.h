@@ -1,8 +1,9 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <libgccjit.h>
 #include <json-c/json.h>
+#include <libgccjit.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "../src/compiler_env.h"
 
 #define CALCULATED_FIELDS_KEY "calculated_fields"

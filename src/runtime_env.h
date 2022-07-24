@@ -1,10 +1,9 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <mpdecimal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-typedef struct
-{
+typedef struct {
   mpd_context_t *mpd_ctx;
 } runtime_env;
 

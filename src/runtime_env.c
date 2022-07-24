@@ -11,6 +11,6 @@ runtime_env *build_runtime_env() {
 
 void release_runtime_env(runtime_env *env) {
   mpd_free(env->mpd_ctx);
-  
+
   free(env);
 }

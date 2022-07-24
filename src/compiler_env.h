@@ -1,9 +1,8 @@
 #include <libgccjit.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-typedef struct
-{
+typedef struct {
   gcc_jit_context *ctx;
   gcc_jit_type *bool_type;
   gcc_jit_type *int_type;

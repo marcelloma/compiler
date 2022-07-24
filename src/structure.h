@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <json-c/json.h>
+#include <stdio.h>
 
 #define STRUCTURE_FILE "./structure.json"
 
