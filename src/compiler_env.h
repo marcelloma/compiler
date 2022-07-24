@@ -5,6 +5,7 @@
 typedef struct {
   gcc_jit_context *ctx;
   gcc_jit_type *size_t_type;
+  gcc_jit_type *void_type;
   gcc_jit_type *void_ptr_type;
   gcc_jit_type *bool_type;
   gcc_jit_type *int_type;
@@ -16,9 +17,13 @@ typedef struct {
   gcc_jit_field *money_currency_field;
   gcc_jit_function *malloc;
   gcc_jit_function *free;
+  gcc_jit_function *mpd_new;
+  gcc_jit_function *mpd_set_string;
 } compiler_env;
 
 compiler_env *build_compiler_env();
 void add_malloc_function(compiler_env *env);
 void add_free_function(compiler_env *env);
+void add_mpd_new_function(compiler_env *env);
+void add_mpd_set_string_function(compiler_env *env);
 void release_compiler_env(compiler_env *env);
