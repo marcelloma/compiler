@@ -18,19 +18,16 @@ gcc_jit_rvalue *comp_un_op_ast(const char *token, json_object *ast, compiler_env
 gcc_jit_rvalue *comp_bin_op_ast(const char *token, json_object *lhs_ast, json_object *rhs_ast, compiler_env *c_env) {
   gcc_jit_rvalue *lhs_rvalue = comp_ast(lhs_ast, c_env);
   gcc_jit_rvalue *rhs_rvalue = comp_ast(rhs_ast, c_env);
+  gcc_jit_rvalue *args[3] = {lhs_rvalue, rhs_rvalue, gcc_jit_param_as_rvalue(c_env->r_env)};
 
   if (strcmp(token, "+") == 0) {
-    return gcc_jit_context_new_binary_op(c_env->ctx, NULL, GCC_JIT_BINARY_OP_PLUS, c_env->double_type, lhs_rvalue,
-                                         rhs_rvalue);
+    return gcc_jit_context_new_call(c_env->ctx, NULL, c_env->dec_add, 3, args);
   } else if (strcmp(token, "-") == 0) {
-    return gcc_jit_context_new_binary_op(c_env->ctx, NULL, GCC_JIT_BINARY_OP_MINUS, c_env->double_type, lhs_rvalue,
-                                         rhs_rvalue);
+    return gcc_jit_context_new_call(c_env->ctx, NULL, c_env->dec_sub, 3, args);
   } else if (strcmp(token, "*") == 0) {
-    return gcc_jit_context_new_binary_op(c_env->ctx, NULL, GCC_JIT_BINARY_OP_MULT, c_env->double_type, lhs_rvalue,
-                                         rhs_rvalue);
+    return gcc_jit_context_new_call(c_env->ctx, NULL, c_env->dec_mul, 3, args);
   } else if (strcmp(token, "/") == 0) {
-    return gcc_jit_context_new_binary_op(c_env->ctx, NULL, GCC_JIT_BINARY_OP_DIVIDE, c_env->double_type, lhs_rvalue,
-                                         rhs_rvalue);
+    return gcc_jit_context_new_call(c_env->ctx, NULL, c_env->dec_div, 3, args);
   } else {
     fprintf(stderr, "error: unsupported binary operator %s\n", token);
     exit(1);

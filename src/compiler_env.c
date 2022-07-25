@@ -31,6 +31,10 @@ compiler_env *build_compiler_env() {
   add_mpd_set_string_function(env);
   add_get_mpd_ctx_function(env);
   add_dec_minus(env);
+  add_dec_add(env);
+  add_dec_sub(env);
+  add_dec_mul(env);
+  add_dec_div(env);
   add_dec_from_str(env);
 
   return env;
@@ -97,6 +101,47 @@ void add_dec_minus(compiler_env *env) {
   gcc_jit_param *params[2] = {dec_param, ctx_param};
   env->dec_minus = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_ptr_type,
                                                 "dec_minus", 2, params, 0);
+}
+
+void add_dec_add(compiler_env *env) {
+  // mpd_t *dec_add(mpd_t *dec_a, mpd_t *dec_b, runtime_env *env);
+  gcc_jit_param *dec_a_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "dec_a");
+  gcc_jit_param *dec_b_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "dec_b");
+  gcc_jit_param *ctx_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "ctx");
+  gcc_jit_param *params[3] = {dec_a_param, dec_b_param, ctx_param};
+  env->dec_add = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_ptr_type,
+                                                "dec_add", 3, params, 0);
+}
+
+void add_dec_sub(compiler_env *env) {
+  // mpd_t *dec_sub(mpd_t *dec_a, mpd_t *dec_b, runtime_env *env);
+  gcc_jit_param *dec_a_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "dec_a");
+  gcc_jit_param *dec_b_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "dec_b");
+  gcc_jit_param *ctx_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "ctx");
+  gcc_jit_param *params[3] = {dec_a_param, dec_b_param, ctx_param};
+  env->dec_sub = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_ptr_type,
+                                                "dec_sub", 3, params, 0);
+}
+
+void add_dec_mul(compiler_env *env) {
+  // mpd_t *dec_mul(mpd_t *dec_a, mpd_t *dec_b, runtime_env *env);
+  gcc_jit_param *dec_a_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "dec_a");
+  gcc_jit_param *dec_b_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "dec_b");
+  gcc_jit_param *ctx_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "ctx");
+  gcc_jit_param *params[3] = {dec_a_param, dec_b_param, ctx_param};
+  env->dec_mul = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_ptr_type,
+                                                "dec_mul", 3, params, 0);
+}
+
+void add_dec_div(compiler_env *env) {
+  // mpd_t *dec_div(mpd_t *dec_a, mpd_t *dec_b, runtime_env *env);
+  gcc_jit_param *dec_a_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "dec_a");
+  gcc_jit_param *dec_b_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "dec_b");
+  gcc_jit_param *ctx_param = gcc_jit_context_new_param(env->ctx, NULL, env->void_ptr_type, "ctx");
+  gcc_jit_param *params[3] = {dec_a_param, dec_b_param, ctx_param};
+
+  env->dec_div = gcc_jit_context_new_function(env->ctx, NULL, GCC_JIT_FUNCTION_IMPORTED, env->void_ptr_type,
+                                                "dec_div", 3, params, 0);
 }
 
 void release_compiler_env(compiler_env *env) {
